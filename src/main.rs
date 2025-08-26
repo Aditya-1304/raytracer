@@ -1,11 +1,23 @@
+use std::env;
+use std::fs::File;
+use std::io::{self, Write};
+fn main() -> io::Result<()> {
+    let args: Vec<String> = env::args().collect();
 
-fn main() {
+    let filename = if args.len() > 1 {
+        &args[1]
+    } else {
+        "image.ppm"
+    };
+
     let image_width  = 256;
     let image_height  = 256;
 
-    println!("P3");
-    println!("{} {}", image_width, image_height);
-    println!("255");
+    let mut file = File::create(filename)?;
+
+    writeln!(file, "P3")?;
+    writeln!(file,"{} {}", image_width, image_height)?;
+    writeln!(file,"255")?;
 
    for j in 0..image_height {
         for i in 0..image_width {
@@ -17,7 +29,10 @@ fn main() {
             let igreen = (255.999 * green) as i32;
             let iblue = (255.999 * blue) as i32;
 
-            println!("{} {} {}", ired, igreen, iblue);
+            writeln!(file,"{} {} {}", ired, igreen, iblue)?;
         }
     }
+
+    println!("Image saved to {}", filename);
+    Ok(())
 }
