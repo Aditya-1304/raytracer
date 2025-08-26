@@ -1,6 +1,10 @@
 use std::env;
 use std::fs::File;
 use std::io::{self, Write};
+
+mod vec3;
+mod color;
+
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
