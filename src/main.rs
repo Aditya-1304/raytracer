@@ -1,9 +1,14 @@
 use std::env;
 use std::fs::File;
 use std::io::{self, Write};
+use std::sync::Arc;
 use color::{Color, write_color};
 use ray::Ray;
 use vec3::{Vec3, Point3,dot, unit_vector};
+use hittable::{Hittable, HitRecord};
+use sphere::Sphere;
+use hittable_list::HittableList;
+use rtweekend::INFINITY;
 
 mod vec3;
 mod color;
@@ -11,27 +16,33 @@ mod ray;
 mod hittable;
 mod sphere;
 mod hittable_list;
+mod rtweekend;
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
-    let oc = *center - *ray.origin();
-    let a = ray.direction().length_squared();
-    let h = dot(ray.direction(), &oc);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
+// fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
+//     let oc = *center - *ray.origin();
+//     let a = ray.direction().length_squared();
+//     let h = dot(ray.direction(), &oc);
+//     let c = oc.length_squared() - radius * radius;
+//     let discriminant = h * h - a * c;
 
-    if discriminant < 0.0 {
-        return -1.0;
-    } else {
-        return (h - discriminant.sqrt()) / a;
-    }
-}
+//     if discriminant < 0.0 {
+//         return -1.0;
+//     } else {
+//         return (h - discriminant.sqrt()) / a;
+//     }
+// }
 
-fn ray_color(ray: &Ray) -> Color {
+fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
 
-    let t = hit_sphere(&Point3::from_values(0.0, 0.0, -1.0), 0.5, ray);
-    if t > 0.0 {
-        let n = unit_vector(&(ray.at(t) - Vec3::from_values(0.0, 0.0, -1.0)));
-        return 0.5 * Color::from_values(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+    // let t = hit_sphere(&Point3::from_values(0.0, 0.0, -1.0), 0.5, ray);
+    // if t > 0.0 {
+    //     let n = unit_vector(&(ray.at(t) - Vec3::from_values(0.0, 0.0, -1.0)));
+    //     return 0.5 * Color::from_values(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+    // }
+
+    let mut rec = HitRecord::new();
+    if world.hit(ray, 0.0, INFINITY, &mut rec) {
+        return 0.5 * Color::from_values(rec.normal.x() + 1.0, rec.normal.y() + 1.0, rec.normal.z() + 1.0);
     }
     let unit_direction = unit_vector(ray.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
@@ -49,11 +60,13 @@ fn main() -> io::Result<()> {
 
     let aspect_ratio = 16.0/9.0;
     let image_width  = 400;
-    
-
     let mut image_height  = (image_width as f64 / aspect_ratio) as i32;
     image_height = if image_height < 1 { 1 } else { image_height };
     
+
+    let mut world = HittableList::new();
+    world.add(Arc::new(Sphere::new(Point3::from_values(0.0, 0.0, -1.0), 0.5)));
+    world.add(Arc::new(Sphere::new(Point3::from_values(0.0, -100.5, -1.0), 100.0)));
 
 
     let focal_length = 1.0;
@@ -90,7 +103,7 @@ fn main() -> io::Result<()> {
             let ray_direction = pixel_center - camera_center;
             let r = Ray::from_origin_direction(camera_center, ray_direction);
 
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             write_color(&mut file, &pixel_color)?;
         }
     }
