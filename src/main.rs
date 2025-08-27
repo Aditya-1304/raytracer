@@ -10,6 +10,8 @@ use sphere::Sphere;
 use hittable_list::HittableList;
 use rtweekend::INFINITY;
 
+use crate::interval::Interval;
+
 mod vec3;
 mod color;
 mod ray;
@@ -17,32 +19,13 @@ mod hittable;
 mod sphere;
 mod hittable_list;
 mod rtweekend;
-
-// fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
-//     let oc = *center - *ray.origin();
-//     let a = ray.direction().length_squared();
-//     let h = dot(ray.direction(), &oc);
-//     let c = oc.length_squared() - radius * radius;
-//     let discriminant = h * h - a * c;
-
-//     if discriminant < 0.0 {
-//         return -1.0;
-//     } else {
-//         return (h - discriminant.sqrt()) / a;
-//     }
-// }
+mod interval;
 
 fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
 
-    // let t = hit_sphere(&Point3::from_values(0.0, 0.0, -1.0), 0.5, ray);
-    // if t > 0.0 {
-    //     let n = unit_vector(&(ray.at(t) - Vec3::from_values(0.0, 0.0, -1.0)));
-    //     return 0.5 * Color::from_values(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
-    // }
-
     let mut rec = HitRecord::new();
-    if world.hit(ray, 0.0, INFINITY, &mut rec) {
-        return 0.5 * Color::from_values(rec.normal.x() + 1.0, rec.normal.y() + 1.0, rec.normal.z() + 1.0);
+    if world.hit(ray, Interval::from_range(0.0, INFINITY), &mut rec) {
+        return 0.5 * (rec.normal + Color::from_values(1.0, 1.0, 1.0))
     }
     let unit_direction = unit_vector(ray.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
