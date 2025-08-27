@@ -8,18 +8,21 @@ use vec3::{Vec3, Point3,dot, unit_vector};
 mod vec3;
 mod color;
 mod ray;
+mod hittable;
+mod sphere;
+mod hittable_list;
 
 fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
     let oc = *center - *ray.origin();
-    let a = dot(ray.direction(), ray.direction());
-    let b = -2.0 * dot(ray.direction(), &oc);
-    let c = dot(&oc, &oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = ray.direction().length_squared();
+    let h = dot(ray.direction(), &oc);
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = h * h - a * c;
 
     if discriminant < 0.0 {
         return -1.0;
     } else {
-        return (-b - discriminant.sqrt()) / (2.0 * a);
+        return (h - discriminant.sqrt()) / a;
     }
 }
 
