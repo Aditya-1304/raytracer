@@ -3,16 +3,27 @@ use std::fs::File;
 use std::io::{self, Write};
 use color::{Color, write_color};
 use ray::Ray;
-use vec3::{Vec3, Point3};
-
-use crate::vec3::unit_vector;
+use vec3::{Vec3, Point3,dot, unit_vector};
 
 mod vec3;
 mod color;
 mod ray;
 
-fn ray_color(r: &Ray) -> Color {
-    let unit_direction = unit_vector(r.direction());
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+    let oc = *center - *ray.origin();
+    let a = dot(ray.direction(), ray.direction());
+    let b = -2.0 * dot(ray.direction(), &oc);
+    let c = dot(&oc, &oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant >= 0.0
+}
+
+fn ray_color(ray: &Ray) -> Color {
+
+    if hit_sphere(&Point3::from_values(0.0, 0.0, -1.0), 0.5, ray) {
+        return Color::from_values(1.0, 0.0, 0.0);
+    }
+    let unit_direction = unit_vector(ray.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
     (1.0 - a) * Color::from_values(1.0, 1.0, 1.0) + a * Color::from_values(0.5, 0.7, 1.0)
 }
