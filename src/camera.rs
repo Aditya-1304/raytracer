@@ -1,4 +1,4 @@
-use crate::vec3::{Vec3, Point3, unit_vector};
+use crate::vec3::{random_on_hemisphere, unit_vector, Point3, Vec3};
 use crate::ray::Ray;
 use crate::color::{Color, write_color};
 use crate::hittable::{Hittable, HitRecord};
@@ -10,6 +10,7 @@ pub struct Camera {
   pub aspect_ratio: f64,
   pub image_width: i32,
   pub samples_per_pixel: i32,
+  pub max_depth: i32,
 
   image_height: i32,
   pixel_samples_scale: f64,
@@ -25,6 +26,7 @@ impl Camera {
       aspect_ratio: 1.0,
       image_width: 100,
       samples_per_pixel: 10,
+      max_depth: 10,
       image_height: 0,
       pixel_samples_scale: 0.0,
       center: Point3::new(),
@@ -46,17 +48,11 @@ impl Camera {
       io::stderr().flush()?;
 
       for i in 0..self.image_width {
-        // let pixel_center = self.pixel00_loc
-        //   + (i as f64 * self.pixel_delta_u)
-        //   + (j as f64 * self.pixel_delta_v);
-        //   let ray_direction = pixel_center - self.center;
-        //   let ray = Ray::from_origin_direction(self.center, ray_direction);
 
-        //   let pixel_color = self.ray_color(&ray, world);
         let mut pixel_color = Color::from_values(0.0, 0.0, 0.0);
         for _sample in 0..self.samples_per_pixel {
           let ray = self.get_ray(i, j);
-          pixel_color = pixel_color + self.ray_color(&ray, world);
+          pixel_color = pixel_color + self.ray_color(&ray, self.max_depth, world);
         }
           write_color(writer, &(self.pixel_samples_scale * pixel_color))?;
       }
@@ -107,11 +103,15 @@ impl Camera {
     Vec3::from_values(random_float() - 0.5, random_float() - 0.5, 0.0)
   }
 
-  fn ray_color(&self, ray: &Ray, world: &dyn Hittable) -> Color {
+  fn ray_color(&self, ray: &Ray, depth: i32, world: &dyn Hittable) -> Color {
+    if depth <= 0{
+      return Color::from_values(0.0, 0.0, 0.0);
+    }
     let mut rec = HitRecord::new();
 
-    if world.hit(ray, Interval::from_range(0.0, INFINITY), &mut rec) {
-      return 0.5 * (rec.normal + Color::from_values(1.0, 1.0, 1.0))
+    if world.hit(ray, Interval::from_range(0.0001, INFINITY), &mut rec) {
+      let direction = random_on_hemisphere(&rec.normal);
+      return 0.5 * self.ray_color(&Ray::from_origin_direction(rec.p, direction),depth - 1, world);
     }
 
     let unit_direction = unit_vector(ray.direction());
@@ -125,3 +125,4 @@ impl Default for Camera {
     Self::new()
   }
 }
+
