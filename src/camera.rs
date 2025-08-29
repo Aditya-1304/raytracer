@@ -1,5 +1,5 @@
-use crate::material::Material;
-use crate::vec3::{cross, random_in_unit_disk, random_on_hemisphere, random_unit_vector, unit_vector, Point3, Vec3};
+// use crate::material::Material;
+use crate::vec3::{cross, random_in_unit_disk, unit_vector, Point3, Vec3};
 use crate::ray::Ray;
 use crate::color::{Color, write_color};
 use crate::hittable::{Hittable, HitRecord};
