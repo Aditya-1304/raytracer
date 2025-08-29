@@ -7,6 +7,9 @@ use sphere::Sphere;
 use hittable_list::HittableList;
 use camera::Camera;
 
+use crate::color::Color;
+use crate::material::{Lambertian, Metal};
+
 
 mod vec3;
 mod color;
@@ -17,6 +20,7 @@ mod hittable_list;
 mod rtweekend;
 mod interval;
 mod camera;
+mod material;
 
 
 fn main() -> io::Result<()> {
@@ -28,9 +32,16 @@ fn main() -> io::Result<()> {
         "image.ppm"
     };
 
+    let material_ground = Arc::new(Lambertian::new(Color::from_values(0.8, 0.8, 0.0)));
+    let material_center = Arc::new(Lambertian::new(Color::from_values(0.1, 0.2, 0.5)));
+    let material_left = Arc::new(Metal::new(Color::from_values(0.8, 0.8, 0.8)));
+    let material_right = Arc::new(Metal::new(Color::from_values(0.8, 0.6, 0.2)));
+
     let mut world = HittableList::new();
-    world.add(Arc::new(Sphere::new(Point3::from_values(0.0, 0.0, -1.0), 0.5)));
-    world.add(Arc::new(Sphere::new(Point3::from_values(0.0, -100.5, -1.0), 100.0)));
+    world.add(Arc::new(Sphere::new(Point3::from_values(0.0, -100.5, -1.0), 100.0, material_ground)));
+    world.add(Arc::new(Sphere::new(Point3::from_values(0.0, 0.0, -1.2), 0.5, material_center)));
+    world.add(Arc::new(Sphere::new(Point3::from_values(-1.0, 0.0, -1.0), 0.5, material_left)));
+    world.add(Arc::new(Sphere::new(Point3::from_values(1.0, 0.0, -1.0), 0.5, material_right)));
 
     let mut camera = Camera::new();
     camera.aspect_ratio = 16.0 / 9.0;

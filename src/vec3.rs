@@ -48,6 +48,11 @@ impl Vec3 {
       random_float_range(min, max)
     )
   }
+
+  pub fn near_zero(&self) -> bool {
+    let s = 1e-8;
+    self.e[0].abs() < s && self.e[1].abs() < s && self.e[2].abs() < s
+  }
 } 
 
 
@@ -144,6 +149,17 @@ impl Mul<Vec3> for f64 {
     }
 }
 
+impl Mul<&Vec3> for f64 {
+    type Output = Vec3;
+    fn mul(self, v: &Vec3) -> Self::Output {
+        Vec3::from_values(
+          self * v.e[0],
+          self * v.e[1],
+          self * v.e[2],
+        )
+    }
+}
+
 impl Mul<f64> for Vec3 {
     type Output = Vec3;
 
@@ -200,3 +216,9 @@ pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
     -on_unit_sphere
   }
 }
+
+
+pub fn reflect(v: &Vec3, normal: &Vec3) -> Vec3 {
+  *v - 2.0 * dot(v, normal) * normal
+}
+
