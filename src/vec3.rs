@@ -208,6 +208,19 @@ pub fn random_unit_vector() -> Vec3 {
   }
 }
 
+pub fn random_in_unit_disk() -> Vec3 {
+  loop {
+    let p = Vec3::from_values(
+      random_float_range(-1.0, 1.0),
+      random_float_range(-1.0, 1.0),
+      0.0
+    );
+    if p.length_squared() < 1.0 {
+      return p;
+    }
+  }
+}
+
 pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
   let on_unit_sphere = random_unit_vector();
   if dot(&on_unit_sphere, normal) > 0.0 {
@@ -224,7 +237,7 @@ pub fn reflect(v: &Vec3, normal: &Vec3) -> Vec3 {
 
 pub fn refract(uv: &Vec3, normal: &Vec3, etai_over_etat: f64) -> Vec3 {
   let cos_theta = dot(&(-*uv), normal).min(1.0);
-  let r_out_prep = etai_over_etat * (*uv + cos_theta * *normal);
-  let r_out_parallel = -(1.0 - r_out_prep.length_squared()).abs().sqrt() * *normal;
-  r_out_prep + r_out_parallel
+  let r_out_perp = etai_over_etat * (*uv + cos_theta * *normal);
+  let r_out_parallel = -(1.0 - r_out_perp.length_squared()).abs().sqrt() * *normal;
+  r_out_perp + r_out_parallel
 }
