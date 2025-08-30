@@ -29,6 +29,12 @@ A high-performance ray tracer built in Rust featuring 8 stunning preset scenes, 
 ### Installation & Usage
 
 ```bash
+cargo install rustytracer
+```
+
+Or you can run from source
+
+```bash
 # Clone the repository
 git clone https://github.com/Aditya-1304/raytracer.git
 cd raytracer
