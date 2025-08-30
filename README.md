@@ -30,6 +30,9 @@ A high-performance ray tracer built in Rust featuring 8 stunning preset scenes, 
 
 ```bash
 cargo install rustytracer
+
+#then run
+raytracer
 ```
 
 Or you can run from source
