@@ -146,7 +146,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "raytracer"
+name = "rustytracer"
 version = "0.1.0"
 dependencies = [
  "rand",
