@@ -9,21 +9,21 @@ pub struct HittableList {
 }
 
 impl HittableList {
-  pub fn new() -> Self {
+  pub fn _new() -> Self {
     HittableList { objects: Vec::new() }
   }
 
-  pub fn from_object(object: Arc<dyn Hittable>) -> Self {
-    let mut list = HittableList::new();
-    list.add(object);
+  pub fn _from_object(object: Arc<dyn Hittable>) -> Self {
+    let mut list = HittableList::_new();
+    list._add(object);
     list
   }
 
-  pub fn clear(&mut self) {
+  pub fn _clear(&mut self) {
     self.objects.clear();
   }
 
-  pub fn add(&mut self, object: Arc<dyn Hittable>) {
+  pub fn _add(&mut self, object: Arc<dyn Hittable>) {
     self.objects.push(object);
   }
 }

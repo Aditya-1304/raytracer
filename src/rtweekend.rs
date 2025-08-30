@@ -15,7 +15,7 @@ pub fn random_float_range(min: f64, max: f64) -> f64 {
   min + (max - min) * random_float()
 }
 
-pub fn random_float_range_direct(min: f64, max: f64) -> f64 {
+pub fn _random_float_range_direct(min: f64, max: f64) -> f64 {
   let mut rng = rand::rng();
   rng.random_range(min..max)
 }
