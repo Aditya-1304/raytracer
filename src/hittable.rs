@@ -35,8 +35,9 @@ impl HitRecord {
 }
 
 
-pub trait Hittable {
+pub trait Hittable: Send + Sync {
     fn hit(&self, ray: &Ray, ray_t: Interval, rec: &mut HitRecord) -> bool;
+    fn bounding_box(&self) -> crate::bvh::AABB;
 }
 
 impl std::fmt::Debug for HitRecord {
@@ -44,7 +45,7 @@ impl std::fmt::Debug for HitRecord {
     f.debug_struct("HitRecord")
       .field("p", &self.p)
       .field("normal", &self.normal)
-      .field("mat", &self.mat.is_some())  // Just show if material exists
+      .field("mat", &self.mat.is_some())  
       .field("t", &self.t)
       .field("front_face", &self.front_face)
       .finish()

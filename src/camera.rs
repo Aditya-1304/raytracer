@@ -1,4 +1,5 @@
-// use crate::material::Material;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
 use crate::vec3::{cross, random_in_unit_disk, unit_vector, Point3, Vec3};
 use crate::ray::Ray;
 use crate::color::{Color, write_color};
@@ -68,19 +69,28 @@ impl Camera {
     writeln!(writer, "{} {}", self.image_width, self.image_height)?;
     writeln!(writer, "255")?;
 
-    for j in 0..self.image_height {
-      eprint!("\rScanlines remaining: {} ", self.image_height - j);
-      io::stderr().flush()?;
-
-      for i in 0..self.image_width {
+    let total_pixels = (self.image_width * self.image_height) as usize;
+    let pixel_colors: Vec<Color> = (0..total_pixels)
+      .into_par_iter()
+      .map(|pixel_idx| {
+        let j = pixel_idx as i32 / self.image_width;
+        let i = pixel_idx as i32 % self.image_width;
+        
+        if i == 0 {
+          eprint!("\rScanlines remaining: {} ", self.image_height - j);
+        }
 
         let mut pixel_color = Color::from_values(0.0, 0.0, 0.0);
         for _sample in 0..self.samples_per_pixel {
           let ray = self.get_ray(i, j);
           pixel_color = pixel_color + self.ray_color(&ray, self.max_depth, world);
         }
-          write_color(writer, &(self.pixel_samples_scale * pixel_color))?;
-      }
+        self.pixel_samples_scale * pixel_color
+      })
+      .collect();
+
+    for color in pixel_colors {
+      write_color(writer, &color)?;
     }
 
     eprintln!("\rDone.                ");

@@ -20,6 +20,14 @@ impl Sphere {
       material : material,
     }
   }
+
+  pub fn bounding_box(&self) -> crate::bvh::AABB {
+    let rvec = Vec3::from_values(self.radius, self.radius, self.radius);
+    crate::bvh::AABB::from_points(
+      self.center - rvec,
+      self.center + rvec
+    )
+  }
 }
 
 impl Hittable for Sphere {
@@ -51,6 +59,10 @@ impl Hittable for Sphere {
       rec.mat = Some(self.material.clone());
 
       true
+  }
+
+  fn bounding_box(&self) -> crate::bvh::AABB {
+    self.bounding_box()
   }
 }
 

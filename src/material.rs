@@ -1,10 +1,10 @@
 use crate::rtweekend::random_float;
-use crate::vec3::{dot, random_unit_vector, reflect, refract, unit_vector, Vec3};
+use crate::vec3::{dot, random_unit_vector, reflect, refract, unit_vector};
 use crate::ray::Ray;
 use crate::hittable::HitRecord;
 use crate::color::Color;
 
-pub trait Material {
+pub trait Material: Send + Sync {
     fn scatter(
       &self,
       r_in: &Ray,
@@ -25,23 +25,29 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-  fn scatter(
+    fn scatter(
         &self,
         _r_in: &Ray,
         rec: &HitRecord,
         attenuation: &mut Color,
         scattered: &mut Ray,
-      ) -> bool {
-      let mut scatter_direction = rec.normal + random_unit_vector();
+    ) -> bool {
+        
+        let albedo_max = self.albedo.x().max(self.albedo.y()).max(self.albedo.z());
+        if random_float() > albedo_max {
+            return false;
+        }
 
-      if scatter_direction.near_zero() {
-        scatter_direction = rec.normal;
-      }
+        let mut scatter_direction = rec.normal + random_unit_vector();
 
-      *scattered = Ray::from_origin_direction(rec.p, scatter_direction);
-      *attenuation = self.albedo;
-      true
-  }
+        if scatter_direction.near_zero() {
+            scatter_direction = rec.normal;
+        }
+
+        *scattered = Ray::from_origin_direction(rec.p, scatter_direction);
+        *attenuation = self.albedo / albedo_max; 
+        true
+    }
 }
 
 pub struct Metal {

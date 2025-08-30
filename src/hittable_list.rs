@@ -1,6 +1,7 @@
 use crate::hittable::{Hittable, HitRecord};
 use crate::ray::Ray;
 use crate::interval::Interval;
+use crate::bvh::AABB;
 use std::sync::Arc;
 
 pub struct HittableList {
@@ -42,5 +43,19 @@ impl Hittable for HittableList {
       }
       
       hit_anything
+  }
+
+  fn bounding_box(&self) -> AABB {
+    if self.objects.is_empty() {
+      return AABB::new(); 
+    }
+
+    let mut output_box = self.objects[0].bounding_box();
+    
+    for object in &self.objects[1..] {
+      output_box = AABB::from_boxes(&output_box, &object.bounding_box());
+    }
+    
+    output_box
   }
 }
